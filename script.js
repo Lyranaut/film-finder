@@ -1,5 +1,5 @@
 function getTmdbApiKey() {
-    return '1154c19df6e9cd079d723182248a57c3'; // Замени на свой API-ключ TMDB
+    return '1154c19df6e9cd079d723182248a57c3';
 }
 
 function searchMedia(movieDescription) {
@@ -27,6 +27,7 @@ document.getElementById('searchForm').addEventListener('submit', function (event
         .then(result => {
             if (result) {
                 displayResult(result);
+                addToSearchHistory(result);
             } else {
                 displayRetryButton();
             }
@@ -43,39 +44,60 @@ document.getElementById('retryButton').addEventListener('click', function () {
     document.getElementById('filmInput').value = '';
 });
 
-function displayResult(result) {
-    var resultContainer = document.getElementById('result');
-    var releaseYear = getReleaseYear(result);
-    var exFsLink = getExFsLink(result);
-    var rezkaLink = getRezkaLink(result);
-    var kinopoiskLink = getKinopoiskLink(result);
-    var synopsis = result.overview || 'Информация отсутствует.';
+document.addEventListener('DOMContentLoaded', function () {
+    var searchHistory = getSearchHistory();
+    window.searchHistory = searchHistory;
 
-    // Получаем рейтинг и ссылку на IMDb из объекта result
-    var imdbRating = result.vote_average || 'Н/Д';
-    var imdbLink = result.external_ids && result.external_ids.imdb_id ? `https://www.imdb.com/title/${result.external_ids.imdb_id}` : '';
+    updateSearchHistoryUI(searchHistory);
+});
 
-    resultContainer.innerHTML = `
-        <h2>${result.title || result.name} ${releaseYear ? `(${releaseYear})` : ''}</h2>
-        <img src="https://image.tmdb.org/t/p/w500${result.poster_path}" alt="${result.title || result.name} Poster" class="movie-poster">
-        ${releaseYear ? `<p><strong>Год выпуска:</strong> ${releaseYear}</p>` : ''}
-        <p><strong>IMDb Рейтинг:</strong> <a href="${imdbLink}" target="_blank" class="imdb-link">${imdbRating}</a></p>
-        <p><strong>Ex-Fs:</strong> <a href="${exFsLink}" target="_blank">${exFsLink}</a></p>
-        <p><strong>Rezka:</strong> <a href="${rezkaLink}" target="_blank">${rezkaLink}</a></p>
-        <p><strong>Kinopoisk:</strong> <a href="${kinopoiskLink}" target="_blank">${kinopoiskLink}</a></p>
-        <p><strong>Синопсис:</strong> ${synopsis}</p>
-    `;
+function addToSearchHistory(result) {
+    var searchHistory = window.searchHistory || [];
+    var newItem = { title: result.title || result.name, year: getReleaseYear(result) };
+    searchHistory.push(newItem);
+    window.searchHistory = searchHistory;
 
-    // Добавим обработчик клика для ссылки на IMDb
-    var imdbElement = resultContainer.querySelector('.imdb-link');
-    if (imdbElement && imdbLink) {
-        imdbElement.addEventListener('click', function (event) {
-            event.preventDefault();
-            var newTab = window.open();
-            newTab.opener = null;
-            newTab.location.href = imdbLink;
+    // Обновляем отображение истории
+    updateSearchHistoryUI(searchHistory);
+
+    // Сохраняем историю в localStorage
+    localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
+}
+
+function getSearchHistory() {
+    var searchHistoryString = localStorage.getItem('searchHistory');
+    return searchHistoryString ? JSON.parse(searchHistoryString) : [];
+}
+
+function updateSearchHistoryUI(searchHistory) {
+    var historyContainer = document.getElementById('searchHistory');
+    historyContainer.innerHTML = '<h2>История поиска</h2>';
+
+    // Отображаем последние 3 запроса
+    var recentSearches = searchHistory.slice(-3);
+    recentSearches.forEach(function (search, index) {
+        var searchItem = document.createElement('div');
+        searchItem.innerHTML = `<p id="searchItem_${index}">${search.title} (${search.year})</p>`;
+        historyContainer.appendChild(searchItem);
+
+        // Добавляем обработчик клика для элемента истории
+        var searchItemElement = document.getElementById(`searchItem_${index}`);
+        searchItemElement.addEventListener('click', function () {
+            // При клике на элемент истории выполняем новый запрос
+            searchMedia(search.title)
+                .then(result => {
+                    if (result) {
+                        displayResult(result);
+                    } else {
+                        displayRetryButton();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    displayRetryButton();
+                });
         });
-    }    
+    });
 }
 
 function getReleaseYear(result) {
@@ -88,19 +110,19 @@ function getReleaseYear(result) {
     }
 }
 
-function getExFsLink(result) {
-    // Здесь нужно добавить логику для формирования ссылки Ex-Fs
-    return 'Ссылка';
-}
+function displayResult(result) {
+    var resultContainer = document.getElementById('result');
+    var releaseYear = getReleaseYear(result);
+    var synopsis = result.overview || 'Информация отсутствует.';
 
-function getRezkaLink(result) {
-    // Здесь нужно добавить логику для формирования ссылки Rezka
-    return 'Ссылка';
-}
+    resultContainer.innerHTML = `
+        <h2>${result.title || result.name} ${releaseYear ? `(${releaseYear})` : ''}</h2>
+        <img src="https://image.tmdb.org/t/p/w500${result.poster_path}" alt="${result.title || result.name} Poster" class="movie-poster">
+        ${releaseYear ? `<p><strong>Год выпуска:</strong> ${releaseYear}</p>` : ''}
+        <p><strong>Синопсис:</strong> ${synopsis}</p>
+    `;
 
-function getKinopoiskLink(result) {
-    // Здесь нужно добавить логику для формирования ссылки Kinopoisk
-    return 'Ссылка';
+    updateSearchHistoryUI(window.searchHistory); // Обновляем историю поиска
 }
 
 function displayRetryButton() {
