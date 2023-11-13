@@ -77,14 +77,17 @@ function updateSearchHistoryUI(searchHistory) {
     var recentSearches = searchHistory.slice(-3);
     recentSearches.forEach(function (search, index) {
         var searchItem = document.createElement('div');
-        searchItem.innerHTML = `<p id="searchItem_${index}">${search.title} (${search.year})</p>`;
+        searchItem.innerHTML = `<p class="search-item" data-search="${search.title}">${search.title} (${search.year})</p>`;
         historyContainer.appendChild(searchItem);
+    });
 
-        // Добавляем обработчик клика для элемента истории
-        var searchItemElement = document.getElementById(`searchItem_${index}`);
-        searchItemElement.addEventListener('click', function () {
+    // Добавляем обработчик клика для элементов истории
+    var searchItems = document.getElementsByClassName('search-item');
+    Array.from(searchItems).forEach(function (searchItem) {
+        searchItem.addEventListener('click', function () {
             // При клике на элемент истории выполняем новый запрос
-            searchMedia(search.title)
+            var movieDescription = searchItem.getAttribute('data-search');
+            searchMedia(movieDescription)
                 .then(result => {
                     if (result) {
                         displayResult(result);
