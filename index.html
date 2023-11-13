@@ -9,13 +9,17 @@
 <body>
     <div class="container">
         <h1>Film Finder</h1>
-        <form id="searchForm">
-            <input type="text" name="filmInput" id="filmInput" placeholder="Введите описание фильма" required>
-            <button type="submit">Найти фильм</button>
-        </form>
-        <div id="result"></div>
-        <div id="searchHistory"></div> <!-- Контейнер для отображения истории поиска -->
-        <button id="retryButton" style="display: none;">Попробовать еще</button>
+        <div class="flex-container">
+            <div id="searchHistory"></div> <!-- Контейнер для отображения истории поиска -->
+            <div id="mainContent">
+                <form id="searchForm">
+                    <input type="text" name="filmInput" id="filmInput" placeholder="Введите описание фильма" required>
+                    <button type="submit">Найти фильм</button>
+                </form>
+                <div id="result"></div>
+                <button id="retryButton" style="display: none;">Попробовать еще</button>
+            </div>
+        </div>
     </div>
 
     <script src="https://www.omdbapi.com/js/omdbapi-2.0.min.js"></script>

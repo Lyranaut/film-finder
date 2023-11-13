@@ -6,7 +6,7 @@ body {
 }
 
 .container {
-    max-width: 600px;
+    max-width: 800px;
     margin: 50px auto;
     text-align: center;
 }
@@ -15,17 +15,29 @@ h1 {
     color: #333;
 }
 
-form {
+.flex-container {
     display: flex;
-    justify-content: center;
-    align-items: center;
+}
+
+#searchHistory {
+    text-align: left;
+    max-width: 200px;
+    margin-right: 20px;
+}
+
+#mainContent {
+    flex-grow: 1;
+    text-align: center;
+}
+
+form {
     margin-bottom: 20px;
 }
 
 input[type="text"] {
     padding: 10px;
     width: 70%;
-    margin-right: 10px;
+    margin-bottom: 10px;
 }
 
 button {
@@ -47,4 +59,8 @@ button:hover {
 .movie-poster {
     max-width: 100%;
     height: auto;
+}
+
+#retryButton {
+    display: none;
 }
