@@ -1,5 +1,6 @@
+// Полный код для tmdb.js
 function getTmdbApiKey() {
-    return '1154c19df6e9cd079d723182248a57c3'; // Замени на свой API-ключ TMDB
+    return '1154c19df6e9cd079d723182248a57c3';
 }
 
 function searchMedia(movieDescription) {

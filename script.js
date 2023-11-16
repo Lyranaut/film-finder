@@ -53,14 +53,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function addToSearchHistory(result) {
     var searchHistory = window.searchHistory || [];
-    var newItem = { title: result.title || result.name, year: getReleaseYear(result) };
+    var newItem = {
+        title: result.title || result.name,
+        year: getReleaseYear(result),
+        director: result.director || '',
+    };
     searchHistory.push(newItem);
     window.searchHistory = searchHistory;
 
-    // Обновляем отображение истории
     updateSearchHistoryUI(searchHistory);
 
-    // Сохраняем историю в localStorage
     localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
 }
 
@@ -73,19 +75,16 @@ function updateSearchHistoryUI(searchHistory) {
     var historyContainer = document.getElementById('searchHistory');
     historyContainer.innerHTML = '<h2>История поиска</h2>';
 
-    // Отображаем последние 3 запроса
     var recentSearches = searchHistory.slice(-3);
     recentSearches.forEach(function (search, index) {
         var searchItem = document.createElement('div');
-        searchItem.innerHTML = `<p class="search-item" data-search="${search.title}">${search.title} (${search.year})</p>`;
+        searchItem.innerHTML = `<p class="search-item" data-search="${search.title}">${search.title} (${search.year}) - ${search.director}</p>`;
         historyContainer.appendChild(searchItem);
     });
 
-    // Добавляем обработчик клика для элементов истории
     var searchItems = document.getElementsByClassName('search-item');
     Array.from(searchItems).forEach(function (searchItem) {
         searchItem.addEventListener('click', function () {
-            // При клике на элемент истории выполняем новый запрос
             var movieDescription = searchItem.getAttribute('data-search');
             searchMedia(movieDescription)
                 .then(result => {
@@ -123,9 +122,17 @@ function displayResult(result) {
         <img src="https://image.tmdb.org/t/p/w500${result.poster_path}" alt="${result.title || result.name} Poster" class="movie-poster">
         ${releaseYear ? `<p><strong>Год выпуска:</strong> ${releaseYear}</p>` : ''}
         <p><strong>Синопсис:</strong> ${synopsis}</p>
+        <p><strong>Режиссер:</strong> ${result.director || 'Информация отсутствует.'}</p>
+
+        <button id="trailerButton">Смотреть трейлер</button>
+        <div id="trailer"></div>
     `;
 
-    updateSearchHistoryUI(window.searchHistory); // Обновляем историю поиска
+    updateSearchHistoryUI(window.searchHistory);
+
+    document.getElementById('trailerButton').addEventListener('click', function () {
+        displayTrailer(result.title || result.name, getReleaseYear(result));
+    });
 }
 
 function displayRetryButton() {
@@ -134,4 +141,27 @@ function displayRetryButton() {
 
 function hideRetryButton() {
     document.getElementById('retryButton').style.display = 'none';
+}
+
+function displayTrailer(movieTitle, releaseYear) {
+    getYouTubeTrailer(movieTitle, releaseYear)
+        .then(videoId => {
+            if (videoId) {
+                var trailerContainer = document.getElementById('trailer');
+                trailerContainer.innerHTML = `
+                    <iframe width="560" height="315" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
+                `;
+                
+                trailerContainer.style.display = 'block';
+
+                var trailerButton = document.getElementById('trailerButton');
+                trailerButton.style.display = 'none';
+
+            } else {
+                console.error('Трейлер не найден');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка при загрузке трейлера:', error);
+        });
 }

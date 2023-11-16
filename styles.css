@@ -1,6 +1,6 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    font-family: 'Arial', sans-serif;
+    background-color: #f9f9f9;
     margin: 0;
     padding: 0;
 }
@@ -13,16 +13,17 @@ body {
 
 h1 {
     color: #333;
+    margin-bottom: 20px;
 }
 
 .flex-container {
     display: flex;
+    justify-content: space-between;
 }
 
 #searchHistory {
     text-align: left;
     max-width: 200px;
-    margin-right: 20px;
 }
 
 #mainContent {
@@ -38,6 +39,8 @@ input[type="text"] {
     padding: 10px;
     width: 70%;
     margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }
 
 button {
@@ -46,6 +49,7 @@ button {
     color: #fff;
     border: none;
     cursor: pointer;
+    border-radius: 5px;
 }
 
 button:hover {
@@ -62,5 +66,14 @@ button:hover {
 }
 
 #retryButton {
+    display: none;
+}
+
+#trailerButton {
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+#trailer {
     display: none;
 }
